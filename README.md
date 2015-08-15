@@ -2,12 +2,26 @@
 The Nice Try shell, meant for honeypots
 
 ## Installation
+Installation is easy:
 ```bash
 go get github.com/kd5pbo/ntsh
-mkdir /tmp/ntsh
+mkdir /tmp/ntsh (if using defaults)
 ```
 
 ## Usage
+The defaults are expected to be safe for most situations, but a `-h` gives
+the command-line options:
+
+```
+-a=false: Prompt for authorization
+-c="": Client's address
+-l="/tmp/ntsh/ntsh.log": Logfile
+-motd="/tmp/ntsh/motd": MOTD to print on connect
+-p="[root@localhost:~]# ": Prompt, may be changed later
+-pw="": If set, only allow in this password; implies -a
+-u="": If set, only allow in this username; implies -a
+```
+
 A telnet server using ncat:
 ```bash
 nohup ncat -ltkp 23 -e $GOPATH/bin/ntsh
