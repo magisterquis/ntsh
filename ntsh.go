@@ -42,6 +42,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 )
 
 var prompt = flag.String(
@@ -69,6 +70,10 @@ func main() {
 		)
 	)
 	flag.Parse()
+
+	/* Ignore interrupts, and most other things */
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc)
 
 	/* Figure out who's connected */
 	if "" == *caddr {
