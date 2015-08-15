@@ -68,6 +68,7 @@ func main() {
 			"Client's address",
 		)
 	)
+	flag.Parse()
 
 	/* Figure out who's connected */
 	if "" == *caddr {
