@@ -68,6 +68,21 @@ func main() {
 			"",
 			"Client's address",
 		)
+		uname = flag.String(
+			"u",
+			"",
+			"If set, only allow in this username; implies -a",
+		)
+		pass = flag.String(
+			"pw",
+			"",
+			"If set, only allow in this password; implies -a",
+		)
+		auth = flag.Bool(
+			"a",
+			false,
+			"Prompt for authorization",
+		)
 	)
 	flag.Parse()
 
@@ -122,9 +137,19 @@ func main() {
 		}
 	}
 
+	/* Input as a scanner */
+	scanner := bufio.NewScanner(os.Stdin)
+
+	/* Maybe authenticate */
+	if *auth || "" != *uname || "" != *pass {
+		if err := Auth(*uname, *pass, *scanner); nil != err {
+			log.Printf("%v!: Auth fail: %v", *caddr, err)
+			return
+		}
+	}
+
 	/* Take lines of input, handle them */
 	fmt.Printf("%v", *prompt)
-	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		if err := run(scanner.Text(), *caddr); nil != err {
 			log.Printf("%v!: Run error: %v", *caddr, err)
