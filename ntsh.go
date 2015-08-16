@@ -133,7 +133,7 @@ func main() {
 			log.Printf("%v!: Unale to get MOTD: %v", *caddr, err)
 		}
 		if nil != motd && 0 != len(motd) {
-			fmt.Printf("%v", string(motd))
+			os.Stdout.Write(motd)
 		}
 	}
 
@@ -142,10 +142,30 @@ func main() {
 
 	/* Maybe authenticate */
 	if *auth || "" != *uname || "" != *pass {
-		if err := Auth(*uname, *pass, *scanner); nil != err {
-			log.Printf("%v!: Auth fail: %v", *caddr, err)
+		u, p, err := Auth(*scanner)
+		if nil != err {
+			log.Printf("%v!: Error during auth: %v", *caddr, err)
 			return
 		}
+		/* Log if a bad username */
+		if !("" == *uname || u == *uname) ||
+			!("" == *pass || p == *pass) {
+			log.Printf(
+				"%v!: Auth with %v / %v failed "+
+					"(Want: %v / %v)",
+				*caddr,
+				u,
+				p,
+				*uname,
+				*pass,
+			)
+			fmt.Fprintf(
+				os.Stdout,
+				"Invalid username or password.\n",
+			)
+			return
+		}
+		log.Printf("%v!: Successful auth with %v / %v", *caddr, u, p)
 	}
 
 	/* Take lines of input, handle them */

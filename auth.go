@@ -1,11 +1,5 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"io"
-)
-
 /*
  * auth.go
  * Handle fake authentication
@@ -40,33 +34,28 @@ import (
  * kd5pbo@gmail.com     dev.x.josiah@mamber.net
  */
 
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"strings"
+	"unicode"
+)
+
 /* Auth does fake authentication, if user or pass are set, it'll only allow
 that specific username or password.  Auth returns nil on successful auth. */
-func Auth(uname, pass string, in bufio.Scanner) error {
-	ue := authPrompt("Username", uname, in)
-	pe := authPrompt("Password", pass, in)
-	if ue != nil {
-		return ue
+func Auth(in bufio.Scanner) (u, p string, err error) {
+	u, err = NextString("Username", in)
+	if err != nil {
+		return
 	}
-	return pe
+	p, err = NextString("Password", in)
+	return
 }
 
-/* Prompt prints p, gets input from in, and if it doesn't match w (if w isn't
-empty), returns an error. */
-func authPrompt(p, w string, in bufio.Scanner) error {
+/* Get the next string from a scanner after printing a prompt, or an error */
+func NextString(p string, s bufio.Scanner) (string, error) {
 	fmt.Printf("%v: ", p)
-	h, err := nextString(in)
-	if nil != err {
-		return err
-	}
-	if "" != w && h != w {
-		return fmt.Errorf("Bad %v answer %v, expected %v", p, h, w)
-	}
-	return nil
-}
-
-/* Get the next string from a scanner, or an error */
-func nextString(s bufio.Scanner) (string, error) {
 	/* See if there's anything to scan */
 	if !s.Scan() {
 		/* If not, return why */
@@ -76,6 +65,13 @@ func nextString(s bufio.Scanner) (string, error) {
 		}
 		return "", e
 	}
-	/* Return the next string */
-	return s.Text(), nil
+	/* Return the last printable chunk */
+	f := strings.FieldsFunc(
+		s.Text(),
+		func(r rune) bool { return !unicode.IsGraphic(r) },
+	)
+	if 0 == len(f) {
+		return "", nil
+	}
+	return f[len(f)-1], nil
 }
