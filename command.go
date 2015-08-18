@@ -39,6 +39,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -71,8 +72,9 @@ func Register(c string, f Command) {
 }
 
 /* run parses a line and runs the appropriate command.  Source should be
-something that identifies the caller, like an IP address. */
-func run(line, source string) error {
+something that identifies the caller, like an IP address.  Ding should be a
+"\a" for a bell every command, or the empty string. */
+func run(line, source, ding string) error {
 	commandsL.Lock()
 	defer commandsL.Unlock()
 	/* Make sure we actually have a command */
@@ -88,7 +90,11 @@ func run(line, source string) error {
 	f, ok := commands[a[0]]
 	if !ok {
 		fmt.Printf("Nice Try!\n")
-		log.Printf("%v!: Unable to find command %v", source, line)
+		log.Printf(
+			"%v!: Unable to find command %v",
+			source,
+			strconv.Quote(line),
+		)
 		return nil
 	}
 	/* Comms channel */
@@ -98,7 +104,8 @@ func run(line, source string) error {
 	go io.Copy(os.Stdout, pr)
 
 	/* Start the command */
-	log.Printf("%v: %v", source, line)
+	log.Printf("%v%v: %v", ding, source, strconv.Quote(line))
+
 	f(a[0], a[1:], pw)
 	return nil
 }
