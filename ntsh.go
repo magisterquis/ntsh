@@ -43,6 +43,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 )
 
 var prompt = flag.String(
@@ -82,6 +83,11 @@ func main() {
 			"a",
 			false,
 			"Prompt for authorization",
+		)
+		bell = flag.Bool(
+			"b",
+			false,
+			"Ding on every command",
 		)
 	)
 	flag.Parse()
@@ -154,8 +160,8 @@ func main() {
 				"%v!: Auth with %v / %v failed "+
 					"(Want: %v / %v)",
 				*caddr,
-				u,
-				p,
+				strconv.Quote(u),
+				strconv.Quote(p),
 				*uname,
 				*pass,
 			)
@@ -165,13 +171,24 @@ func main() {
 			)
 			return
 		}
-		log.Printf("%v!: Successful auth with %v / %v", *caddr, u, p)
+		log.Printf(
+			"%v!: Successful auth with %v / %v",
+			*caddr,
+			strconv.Quote(u),
+			strconv.Quote(p),
+		)
+	}
+
+	/* Work out the ding */
+	ding := ""
+	if *bell {
+		ding = "\a"
 	}
 
 	/* Take lines of input, handle them */
 	fmt.Printf("%v", *prompt)
 	for scanner.Scan() {
-		if err := run(scanner.Text(), *caddr); nil != err {
+		if err := run(scanner.Text(), *caddr, ding); nil != err {
 			log.Printf("%v!: Run error: %v", *caddr, err)
 			break
 		}
