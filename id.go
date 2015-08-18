@@ -36,6 +36,4 @@ package main
 
 import "github.com/kd5pbo/ntsh/id"
 
-func init() {
-	Register("id", id.Id)
-}
+func init() { Register("id", id.Id) }
